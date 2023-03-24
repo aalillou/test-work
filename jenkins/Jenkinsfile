@@ -1,7 +1,7 @@
 def registry = "http://nexus"
 def dirPath = "containers"
+def tagChoice = ["latest", "timestamp"]
 def imagesList = []
-def tagList = ["latest", "timestamp"]
 
 def getImagesList(dir) {
     sh "ls ${dir} > _list"
@@ -10,7 +10,7 @@ def getImagesList(dir) {
     return list
 }
 
-def KanikoBuildAndPush(registry, image, tag) {
+def kanikoBuildAndPush(registry, image, tag) {
     echo "Kaniko: building and pushing image: ${registry}/${image}:${tag} ... to Nexus"
 }
 
@@ -28,9 +28,8 @@ pipeline {
                 script {
                     imagesList = getImagesList(dirPath)
                     image = input message: "Select image (Dockerfile)", parameters: [choice(name: "image", choices: imagesList)]
-                    tag = input message: "Select tag (latest)", parameters: [choice(name: "tag", choices: tagList)]
+                    tag = input message: "Select tag (latest)", parameters: [choice(name: "tag", choices: tagChoice)]
                 }
-                // echo 'Please select a tag'
             }
         }
         stage('Build and push to nexus') {
@@ -38,7 +37,7 @@ pipeline {
                 script {
                     // ${BUILD_TIMESTAMP}
                     tag = tag != 'timestamp' ? tag : new Date().getTime()/1000 as Integer 
-                    KanikoBuildAndPush (${registry},${image},${tag})
+                    kanikoBuildAndPush (${registry},${image},${tag})
                 }
             }
         }
