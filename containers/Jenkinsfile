@@ -61,7 +61,9 @@ pipeline {
         stage ("testing"){
             steps {
                 script {
-                    def list = findFiles(glob: 'containers/').findAll { it.directory }
+                    //def list = findFiles(glob: 'containers/').findAll { it.directory }
+                    def list = findFiles(glob: 'containers/**/Dockerfile').collect { it.path.substring('containers/'.length()) }
+                    echo list.toString()
                 }
             }
 
