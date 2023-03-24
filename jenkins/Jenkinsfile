@@ -33,7 +33,7 @@ pipeline {
             steps {
                 script {
                     // ${BUILD_TIMESTAMP}
-                    tag = tag !== 'timestamp' ? tag : new Date().getTime()/1000 as Integer 
+                    tag = tag != 'timestamp' ? tag : new Date().getTime()/1000 as Integer 
                     echo "Kaniko: building and pushing image: ${registry}/${image}:${tag} ... to Nexus"
                 }
                 
