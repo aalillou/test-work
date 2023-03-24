@@ -5,7 +5,7 @@ def imagesList = []
 
 // ImagesList from directories in containers
 def getImagesList(dir) {
-   def list = sh ("ls -l ${dir} | grep '^d' | awk '{print \$NF}'", returnStdout: true).split( "\\r?\\n" ) as List;
+   def list = sh (script: "ls -l ${dir} | grep '^d' | awk '{print \$NF}'", returnStdout: true).split( "\\r?\\n" ) as List;
     list = list.collect{ it.trim() }
     list.add('Build all')
     return list
@@ -68,33 +68,31 @@ pipeline {
         stage ("testing"){
             steps {
                 script {
-                    //def list = findFiles(glob: 'containers/').findAll { it.directory }
-                    def list = findFiles(glob: 'containers/**').collect { it.path.substring('containers/'.length()) }
-                    echo list.toString()
+                    //
                 }
             }
         }
-        // stage('Select image and tag to build and push to registry') {
-        //     steps {
-        //         script {
-        //             imagesList = getImagesList(dirPath)
-        //             image = input message: "Select image (Dockerfile)", parameters: [choice(name: "image", choices: imagesList)]
-        //             tag = input message: "Select tag (latest)", parameters: [choice(name: "tag", choices: tagChoice)]
-        //             tag = tag != 'timestamp' ? tag : new Date().format("yyyyMMdd")
+        stage('Select image and tag to build and push to registry') {
+            steps {
+                script {
+                    imagesList = getImagesList(dirPath)
+                    image = input message: "Select image (Dockerfile)", parameters: [choice(name: "image", choices: imagesList)]
+                    tag = input message: "Select tag (latest)", parameters: [choice(name: "tag", choices: tagChoice)]
+                    tag = tag != 'timestamp' ? tag : new Date().format("yyyyMMdd")
 
-        //             if (image != 'Build all') kanikoBuildAndPush (registry, image, tag) // <- Selected build
-        //             else {                                                              // <-- Selected build all
-        //                 echo 'LOOPING - kanikoBuildAndPush'
-        //                 try { 
-        //                     imagesList[0..-2].each{ image -> // remove 'Build all' from list and loop
-        //                         kanikoBuildAndPush (registry, image, tag)
-        //                     }
-        //                 } catch(e) {
-        //                     println "Error occurred! LOOPING - kanikoBuildAndPush - image: ${registry}/images/${image}:${tag}"
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+                    if (image != 'Build all') kanikoBuildAndPush (registry, image, tag) // <- Selected build
+                    else {                                                              // <-- Selected build all
+                        echo 'LOOPING - kanikoBuildAndPush'
+                        try { 
+                            imagesList[0..-2].each{ image -> // remove 'Build all' from list and loop
+                                kanikoBuildAndPush (registry, image, tag)
+                            }
+                        } catch(e) {
+                            println "Error occurred! LOOPING - kanikoBuildAndPush - image: ${registry}/images/${image}:${tag}"
+                        }
+                    }
+                }
+            }
+        }
     }
 }
