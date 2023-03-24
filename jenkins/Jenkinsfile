@@ -1,9 +1,15 @@
 def imagesList = ["test", "acc", "dev", "cypress"]
 def tagList = ["latest", "timestamp"]
 
-def dir = new File("containers")
-dir.eachFileRecurse (FileType.FILES) { file ->
-  imagesList << file
+@NonCPS
+def getAllImages(rootPath) {
+    def list = []
+    for (subPath in rootPath.list()) {
+        list << subPath.getName()
+        // in case you don't want extension
+        // list << FilenameUtils.removeExtension(subPath.getName())
+    }
+    return list
 }
 
 pipeline {
@@ -15,6 +21,7 @@ pipeline {
         stage('Checkout code') {
             steps {
                 checkout scm
+                files = findFiles(glob: 'containers')
             }
         }
         stage('Select image to build') {
