@@ -8,7 +8,7 @@ def getImagesList(dir) {
     sh "ls ${dir} > _list"
     def list = readFile( "_list" ).split( "\\r?\\n" ) as List;
     sh "rm -f _list"
-    return (list.collect it.trim()).add('Build all')
+    return (list.collect{it.trim()}).add('Build all')
 }
 
 // Building build docker images with Kaniko
