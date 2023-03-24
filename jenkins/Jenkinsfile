@@ -1,3 +1,4 @@
+def registry = "http://nexus"
 def dirPath = "containers"
 def imagesList = []
 def tagList = ["latest", "timestamp"]
@@ -30,7 +31,12 @@ pipeline {
         }
         stage('Build and push to nexus') {
             steps {
-                echo "Kaniko: building and pushing image: ${image}:${tag} ... to Nexus"
+                script {
+                    // ${BUILD_TIMESTAMP}
+                    tag = tag !== 'timestamp' ? tag : new Date().getTime()/1000 as Integer 
+                    echo "Kaniko: building and pushing image: ${registry}/${image}:${tag} ... to Nexus"
+                }
+                
             }
         }
     }
