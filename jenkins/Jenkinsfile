@@ -3,6 +3,7 @@ def dirPath = "containers"
 def tagChoice = ["latest", "timestamp"]
 def imagesList = []
 
+// ImagesList from directories in containers
 def getImagesList(dir) {
     sh "ls ${dir} > _list"
     def list = readFile( "_list" ).split( "\\r?\\n" ) as List;
@@ -12,9 +13,10 @@ def getImagesList(dir) {
     return list
 }
 
+// Building build docker images with Kaniko
 def kanikoBuildAndPush(registry, image, tag) {
     try {
-        echo "Kaniko: building and pushing image: ${registry}/${image.trim()}:${tag} ... to Nexus"
+        println "Kaniko: building and pushing image: ${registry}/${image.trim()}:${tag} ... to Nexus"
     } catch(e) {
         println "kanikoBuildAndPush: Error occurred! - image: ${registry}/${image.trim()}:${tag}"
     }
@@ -36,11 +38,11 @@ pipeline {
                     tag = input message: "Select tag (latest)", parameters: [choice(name: "tag", choices: tagChoice)]
                     tag = tag != 'timestamp' ? tag : new Date().getTime()/1000 as Integer 
 
-                    if (image != 'Build all') kanikoBuildAndPush (registry,image,tag)
-                    else {
+                    if (image != 'Build all') kanikoBuildAndPush (registry, image, tag) // <- Selected build
+                    else {                                                              // <-- Selected build all
                         echo 'LOOPING - kanikoBuildAndPush'
-                        try {
-                            imagesList[0..-2].each{ image ->
+                        try { 
+                            imagesList[0..-2].each{ image -> // remove 'Build all' from list and loop
                                 kanikoBuildAndPush (registry, image, tag)
                             }
                         } catch(e) {
