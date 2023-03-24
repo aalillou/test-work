@@ -62,7 +62,7 @@ pipeline {
         stage ("testing"){
             steps {
                 script {
-                    def list = findFiles(glob: "containers").findAll { it.directory }
+                    def list = findFiles(glob: 'containers/').findAll { it.directory }
                 }
             }
 
