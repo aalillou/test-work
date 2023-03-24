@@ -1,0 +1,32 @@
+def imagesList = ["test", "acc", "dev", "cypress"]
+def tagList = ["latest", "timestamp"]
+
+def dir = new File("containers")
+dir.eachFileRecurse (FileType.FILES) { file ->
+  imagesList << file
+}
+
+def imagesList = ["test", "acc", "dev", "cypress"]
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Select image to build') {
+            steps {
+                script {
+                    env = input message: "Select image (Dockerfile)",
+                        parameters: [
+                            choice(name: "image", choices: imagesList, description: "specifieert de namespace binnen de Atos Openshift cluster.")
+                        ]
+                }
+                // echo 'Please select a tag'
+            }
+        }
+        stage('Build and push to nexus') {
+            steps {
+                echo 'Kaniko: building and pushing ...'
+            }
+        }
+    }
+}
