@@ -7,10 +7,9 @@ def imagesList = []
 def getImagesList(dir) {
     sh "ls ${dir} > _list"
     def list = readFile( "_list" ).split( "\\r?\\n" ) as List;
-    list = list.collect{ it.trim() }
-    list.add('Build all');
     sh "rm -f _list"
-    return list
+    list = list.collect{ it.trim() }
+    return list.add('Build all');
 }
 
 // Building build docker images with Kaniko
@@ -24,6 +23,12 @@ def kanikoBuildAndPush(registry, image, tag) {
 
 pipeline {
     agent any
+
+    options { 
+        skipDefaultCheckout()
+        timeout(time: 45, unit: 'MINUTES')
+    }
+
     stages {
         stage('Checkout code') {
             steps {
