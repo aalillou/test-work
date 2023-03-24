@@ -14,17 +14,17 @@ def getImagesList(dir) {
 }
 
 // Building build docker images with Kaniko
-def kanikoBuildAndPush2(registry, image, tag) {
+def kanikoBuildAndPush(registry, image, tag) {
     try {
-        echo "Kaniko: building and pushing image: ${registry}/${image.trim()}:${tag} ... to Nexus"
+        echo "Kaniko: building and pushing image: ${registry}/images/${image.trim()}:${tag} ... to Nexus"
     } catch(e) {
-        println "kanikoBuildAndPush: Error occurred! - image: ${registry}/${image.trim()}:${tag}"
+        println "kanikoBuildAndPush: Error occurred! - image: ${registry}/images/${image.trim()}:${tag}"
     }
 }
 
-def kanikoBuildAndPush(registry, image, tag) {
+def kanikoBuildAndPush2(registry, image, tag) {
     try {
-        echo "Kaniko: building and pushing image: ${registry}/${image.trim()}:${tag} ... to Nexus"
+        echo "Kaniko: building and pushing image: ${registry}/images/${image.trim()}:${tag} ... to Nexus"
 
         sh """#!/bin/sh
         CONTEXT=\$(pwd)/context
@@ -73,7 +73,7 @@ pipeline {
                                 kanikoBuildAndPush (registry, image, tag)
                             }
                         } catch(e) {
-                            println "Error occurred! LOOPING - kanikoBuildAndPush - image: ${registry}/${image}:${tag}"
+                            println "Error occurred! LOOPING - kanikoBuildAndPush - image: ${registry}/images/${image}:${tag}"
                         }
                     }
                 }
