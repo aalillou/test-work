@@ -6,8 +6,6 @@ dir.eachFileRecurse (FileType.FILES) { file ->
   imagesList << file
 }
 
-def imagesList = ["test", "acc", "dev", "cypress"]
-
 pipeline {
     agent any
 
@@ -16,7 +14,7 @@ pipeline {
             checkout scm
         }
     }
-    
+
     stages {
         stage('Select image to build') {
             steps {
