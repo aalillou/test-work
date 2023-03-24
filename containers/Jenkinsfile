@@ -13,7 +13,6 @@ def getImagesList2(dir) {
     return list
 }
 
-findFiles(glob: ).findAll { it.directory }
 
 // Building build docker images with Kaniko
 def kanikoBuildAndPush(registry, image, tag) {
