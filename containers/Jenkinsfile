@@ -65,13 +65,6 @@ pipeline {
                 checkout scm
             }
         }
-        stage ("testing"){
-            steps {
-                script {
-                    //
-                }
-            }
-        }
         stage('Select image and tag to build and push to registry') {
             steps {
                 script {
