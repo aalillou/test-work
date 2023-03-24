@@ -37,7 +37,7 @@ pipeline {
                 script {
                     // ${BUILD_TIMESTAMP}
                     tag = tag != 'timestamp' ? tag : new Date().getTime()/1000 as Integer 
-                    kanikoBuildAndPush (${registry},${image},${tag})
+                    kanikoBuildAndPush (registry,image,tag)
                 }
             }
         }
