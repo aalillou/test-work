@@ -63,7 +63,7 @@ pipeline {
                     imagesList = getImagesList(dirPath)
                     image = input message: "Select image (Dockerfile)", parameters: [choice(name: "image", choices: imagesList)]
                     tag = input message: "Select tag (latest)", parameters: [choice(name: "tag", choices: tagChoice)]
-                    tag = tag != 'timestamp' ? tag : new Date().now.format("yyyyMMdd")
+                    tag = tag != 'timestamp' ? tag : new Date().format("yyyyMMdd")
 
                     if (image != 'Build all') kanikoBuildAndPush (registry, image, tag) // <- Selected build
                     else {                                                              // <-- Selected build all
