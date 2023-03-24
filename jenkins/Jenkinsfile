@@ -1,21 +1,16 @@
-def imagesList = ["test", "acc", "dev", "cypress"]
+def dirPath = "containers"
+def imagesList = []
 def tagList = ["latest", "timestamp"]
 
-@NonCPS
-def getAllImages(rootPath) {
-    def list = []
-    for (subPath in rootPath.list()) {
-        list << subPath.getName()
-        // in case you don't want extension
-        // list << FilenameUtils.removeExtension(subPath.getName())
-    }
+def getImagesList(dir) {
+    sh "ls ${dir} > _list"
+    def list = readFile( "_list" ).split( "\\r?\\n" ) as List;
+    sh "rm -f _list"
     return list
 }
 
 pipeline {
     agent any
-
-
 
     stages {
         stage('Checkout code') {
@@ -23,21 +18,19 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Select image to build') {
+        stage('Select image and tag to build') {
             steps {
                 script {
-                    files = findFiles(glob: 'containers')
-                    env = input message: "Select image (Dockerfile)",
-                        parameters: [
-                            choice(name: "image", choices: imagesList, description: "specifieert de namespace binnen de Atos Openshift cluster.")
-                        ]
+                    imagesList = getImagesList(dirPath)
+                    image = input message: "Select image (Dockerfile)", parameters: [choice(name: "image", choices: imagesList)]
+                    tag = input message: "Select tag (latest)", parameters: [choice(name: "tag", choices: tagList)]
                 }
                 // echo 'Please select a tag'
             }
         }
         stage('Build and push to nexus') {
             steps {
-                echo 'Kaniko: building and pushing ...'
+                echo "Kaniko: building and pushing image: ${image}:${tag} ... to Nexus"
             }
         }
     }
