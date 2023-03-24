@@ -9,13 +9,14 @@ dir.eachFileRecurse (FileType.FILES) { file ->
 pipeline {
     agent any
 
-    stage('Checkout code') {
-        steps {
-            checkout scm
-        }
-    }
+
 
     stages {
+        stage('Checkout code') {
+            steps {
+                checkout scm
+            }
+        }
         stage('Select image to build') {
             steps {
                 script {
