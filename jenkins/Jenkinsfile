@@ -7,14 +7,16 @@ def imagesList = []
 def getImagesList(dir) {
     sh "ls ${dir} > _list"
     def list = readFile( "_list" ).split( "\\r?\\n" ) as List;
+    list = list.collect{ it.trim() }
+    list.add('Build all');
     sh "rm -f _list"
-    return (list.collect{it.trim()}).add('Build all')
+    return list
 }
 
 // Building build docker images with Kaniko
 def kanikoBuildAndPush(registry, image, tag) {
     try {
-        println "Kaniko: building and pushing image: ${registry}/${image.trim()}:${tag} ... to Nexus"
+        echo "Kaniko: building and pushing image: ${registry}/${image.trim()}:${tag} ... to Nexus"
     } catch(e) {
         println "kanikoBuildAndPush: Error occurred! - image: ${registry}/${image.trim()}:${tag}"
     }
