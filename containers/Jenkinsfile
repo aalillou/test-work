@@ -4,7 +4,7 @@ def tagChoice = ["latest", "timestamp"]
 def imagesList = []
 
 // ImagesList from directories in containers
-def getImagesList(dir) {
+def getImagesList2(dir) {
     sh "ls ${dir} > _list"
     def list = readFile( "_list" ).split( "\\r?\\n" ) as List;
     sh "rm -f _list"
@@ -12,6 +12,8 @@ def getImagesList(dir) {
     list.add('Build all')
     return list
 }
+
+findFiles(glob: ).findAll { it.directory }
 
 // Building build docker images with Kaniko
 def kanikoBuildAndPush(registry, image, tag) {
@@ -57,27 +59,35 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Select image and tag to build and push to registry') {
+        stage ("testing"){
             steps {
                 script {
-                    imagesList = getImagesList(dirPath)
-                    image = input message: "Select image (Dockerfile)", parameters: [choice(name: "image", choices: imagesList)]
-                    tag = input message: "Select tag (latest)", parameters: [choice(name: "tag", choices: tagChoice)]
-                    tag = tag != 'timestamp' ? tag : new Date().format("yyyyMMdd")
-
-                    if (image != 'Build all') kanikoBuildAndPush (registry, image, tag) // <- Selected build
-                    else {                                                              // <-- Selected build all
-                        echo 'LOOPING - kanikoBuildAndPush'
-                        try { 
-                            imagesList[0..-2].each{ image -> // remove 'Build all' from list and loop
-                                kanikoBuildAndPush (registry, image, tag)
-                            }
-                        } catch(e) {
-                            println "Error occurred! LOOPING - kanikoBuildAndPush - image: ${registry}/images/${image}:${tag}"
-                        }
-                    }
+                    def list = findFiles(glob: "containers").findAll { it.directory }
                 }
             }
+
         }
+        // stage('Select image and tag to build and push to registry') {
+        //     steps {
+        //         script {
+        //             imagesList = getImagesList(dirPath)
+        //             image = input message: "Select image (Dockerfile)", parameters: [choice(name: "image", choices: imagesList)]
+        //             tag = input message: "Select tag (latest)", parameters: [choice(name: "tag", choices: tagChoice)]
+        //             tag = tag != 'timestamp' ? tag : new Date().format("yyyyMMdd")
+
+        //             if (image != 'Build all') kanikoBuildAndPush (registry, image, tag) // <- Selected build
+        //             else {                                                              // <-- Selected build all
+        //                 echo 'LOOPING - kanikoBuildAndPush'
+        //                 try { 
+        //                     imagesList[0..-2].each{ image -> // remove 'Build all' from list and loop
+        //                         kanikoBuildAndPush (registry, image, tag)
+        //                     }
+        //                 } catch(e) {
+        //                     println "Error occurred! LOOPING - kanikoBuildAndPush - image: ${registry}/images/${image}:${tag}"
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
     }
 }
