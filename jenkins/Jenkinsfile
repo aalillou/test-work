@@ -1,4 +1,4 @@
-def registry = "http://nexus"
+def registry = "composer-registry-30262-nexus-docker.composer-nexus.svc.cluster.local:6003"
 def dirPath = "containers"
 def tagChoice = ["latest", "timestamp"]
 def imagesList = []
@@ -9,13 +9,35 @@ def getImagesList(dir) {
     def list = readFile( "_list" ).split( "\\r?\\n" ) as List;
     sh "rm -f _list"
     list = list.collect{ it.trim() }
-    return list.add('Build all');
+    list.add('Build all')
+    return list
 }
 
 // Building build docker images with Kaniko
+def kanikoBuildAndPush2(registry, image, tag) {
+    try {
+        echo "Kaniko: building and pushing image: ${registry}/${image.trim()}:${tag} ... to Nexus"
+    } catch(e) {
+        println "kanikoBuildAndPush: Error occurred! - image: ${registry}/${image.trim()}:${tag}"
+    }
+}
+
 def kanikoBuildAndPush(registry, image, tag) {
     try {
         echo "Kaniko: building and pushing image: ${registry}/${image.trim()}:${tag} ... to Nexus"
+
+        sh """#!/bin/sh
+        CONTEXT=\$(pwd)/context
+        mkdir -p /tmp/cache
+
+        /kaniko/executor \
+            --dockerfile="Dockerfile" \
+            --cache="true" \
+            --cache-dir="/tmp/cache" \
+            --destination="${registry}/images/${image}:${tag}" \
+            --context="dir://\$CONTEXT"
+        """
+        
     } catch(e) {
         println "kanikoBuildAndPush: Error occurred! - image: ${registry}/${image.trim()}:${tag}"
     }
@@ -41,7 +63,7 @@ pipeline {
                     imagesList = getImagesList(dirPath)
                     image = input message: "Select image (Dockerfile)", parameters: [choice(name: "image", choices: imagesList)]
                     tag = input message: "Select tag (latest)", parameters: [choice(name: "tag", choices: tagChoice)]
-                    tag = tag != 'timestamp' ? tag : new Date().getTime()/1000 as Integer 
+                    tag = tag != 'timestamp' ? tag : new Date().now.format("yyyyMMdd")
 
                     if (image != 'Build all') kanikoBuildAndPush (registry, image, tag) // <- Selected build
                     else {                                                              // <-- Selected build all
