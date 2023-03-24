@@ -10,6 +10,10 @@ def getImagesList(dir) {
     return list
 }
 
+def KanikoBuildAndPush(registry, image, tag) {
+    echo "Kaniko: building and pushing image: ${registry}/${image}:${tag} ... to Nexus"
+}
+
 pipeline {
     agent any
 
@@ -34,9 +38,8 @@ pipeline {
                 script {
                     // ${BUILD_TIMESTAMP}
                     tag = tag != 'timestamp' ? tag : new Date().getTime()/1000 as Integer 
-                    echo "Kaniko: building and pushing image: ${registry}/${image}:${tag} ... to Nexus"
+                    KanikoBuildAndPush (${registry},${image},${tag})
                 }
-                
             }
         }
     }
