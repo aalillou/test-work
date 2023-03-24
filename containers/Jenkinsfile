@@ -4,8 +4,15 @@ def tagChoice = ["latest", "timestamp"]
 def imagesList = []
 
 // ImagesList from directories in containers
+def getImagesList(dir) {
+   def list = sh ("ls -l ${dir} | grep '^d' | awk '{print \$NF}'", returnStdout: true).split( "\\r?\\n" ) as List;
+    list = list.collect{ it.trim() }
+    list.add('Build all')
+    return list
+}
+
 def getImagesList2(dir) {
-    sh "ls ${dir} > _list"
+    sh "ls -l ${dir} | grep '^d' | awk '{print \$NF}' > _list"
     def list = readFile( "_list" ).split( "\\r?\\n" ) as List;
     sh "rm -f _list"
     list = list.collect{ it.trim() }
@@ -62,11 +69,10 @@ pipeline {
             steps {
                 script {
                     //def list = findFiles(glob: 'containers/').findAll { it.directory }
-                    def list = findFiles(glob: 'containers/**/Dockerfile').collect { it.path.substring('containers/'.length()) }
+                    def list = findFiles(glob: 'containers/**').collect { it.path.substring('containers/'.length()) }
                     echo list.toString()
                 }
             }
-
         }
         // stage('Select image and tag to build and push to registry') {
         //     steps {
