@@ -11,6 +11,12 @@ def imagesList = ["test", "acc", "dev", "cypress"]
 pipeline {
     agent any
 
+    stage('Checkout code') {
+        steps {
+            checkout scm
+        }
+    }
+    
     stages {
         stage('Select image to build') {
             steps {
