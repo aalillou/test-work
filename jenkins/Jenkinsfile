@@ -21,12 +21,12 @@ pipeline {
         stage('Checkout code') {
             steps {
                 checkout scm
-                files = findFiles(glob: 'containers')
             }
         }
         stage('Select image to build') {
             steps {
                 script {
+                    files = findFiles(glob: 'containers')
                     env = input message: "Select image (Dockerfile)",
                         parameters: [
                             choice(name: "image", choices: imagesList, description: "specifieert de namespace binnen de Atos Openshift cluster.")
