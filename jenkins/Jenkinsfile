@@ -32,7 +32,7 @@ pipeline {
                     tag = input message: "Select tag (latest)", parameters: [choice(name: "tag", choices: tagChoice)]
                     tag = tag != 'timestamp' ? tag : new Date().getTime()/1000 as Integer 
 
-                    if image != 'Build all' kanikoBuildAndPush (registry,image,tag)
+                    if (image != 'Build all') kanikoBuildAndPush (registry,image,tag)
                     else {
                         echo 'LOOP - kanikoBuildAndPush'
                     }
